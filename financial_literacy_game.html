@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Small Biz Financial Game</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f3ee;
+      --surface: #ffffff;
+      --surface2: #f0ede6;
+      --border: rgba(0,0,0,0.1);
+      --border2: rgba(0,0,0,0.18);
+      --text: #1a1a18;
+      --text2: #5a5a55;
+      --text3: #8a8a84;
+      --green: #2d6a4f;
+      --green-bg: #d8f3dc;
+      --red: #9b2335;
+      --red-bg: #fde8eb;
+      --blue: #1a4a7a;
+      --blue-bg: #dbeafe;
+      --amber: #7c4a00;
+      --amber-bg: #fef3c7;
+      --radius: 10px;
+      --radius-lg: 14px;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    #game {
+      width: 100%;
+      max-width: 640px;
+    }
+
+    header {
+      margin-bottom: 1.5rem;
+    }
+
+    header h1 {
+      font-size: 22px;
+      font-weight: normal;
+      letter-spacing: -0.3px;
+      color: var(--text);
+    }
+
+    header p {
+      font-size: 13px;
+      color: var(--text3);
+      margin-top: 3px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .top-bar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 1.25rem;
+    }
+
+    .metric {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-size: 18px;
+      font-weight: normal;
+      color: var(--text);
+    }
+
+    .metric-value.danger { color: var(--red); }
+    .metric-value.success { color: var(--green); }
+
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .month-label {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 0.75rem;
+    }
+
+    .card h3 {
+      font-size: 17px;
+      font-weight: normal;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    .scenario-text {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.65;
+      margin-bottom: 1rem;
+    }
+
+    .tip-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: var(--amber-bg);
+      color: var(--amber);
+      margin-top: 6px;
+    }
+
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 1rem;
+    }
+
+    .choice-btn {
+      text-align: left;
+      padding: 0.85rem 1rem;
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+    }
+
+    .choice-btn:hover {
+      background: var(--surface2);
+      border-color: var(--border2);
+    }
+
+    .choice-label {
+      display: block;
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .choice-hint {
+      font-size: 12px;
+      color: var(--text3);
+      font-family: 'Courier New', monospace;
+    }
+
+    .result-box {
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+      font-size: 13px;
+      line-height: 1.65;
+      margin-bottom: 1rem;
+      font-family: 'Georgia', serif;
+    }
+
+    .result-box.good { background: var(--green-bg); color: var(--green); }
+    .result-box.bad { background: var(--red-bg); color: var(--red); }
+    .result-box.neutral { background: var(--blue-bg); color: var(--blue); }
+
+    .next-btn {
+      width: 100%;
+      padding: 0.85rem;
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text);
+      font-family: 'Georgia', serif;
+      transition: background 0.12s;
+    }
+
+    .next-btn:hover { background: var(--surface2); }
+
+    .log-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+    }
+
+    .log-title {
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text3);
+      margin-bottom: 0.5rem;
+    }
+
+    .log {
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      color: var(--text2);
+      max-height: 90px;
+      overflow-y: auto;
+      line-height: 1.7;
+    }
+
+    .log-empty {
+      color: var(--text3);
+      font-style: italic;
+    }
+
+    /* Game over */
+    .game-over { text-align: center; padding: 1.5rem 0.5rem; }
+    .game-over h2 { font-size: 20px; font-weight: normal; margin-bottom: 0.5rem; }
+    .game-over p { font-size: 14px; color: var(--text2); margin-bottom: 1.25rem; line-height: 1.65; }
+    .score-big { font-size: 48px; font-weight: normal; margin: 0.75rem 0; color: var(--text); }
+    .grade-label { font-size: 12px; font-family: 'Courier New', monospace; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Progress bar */
+    .progress-track {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--text2);
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    @media (max-width: 480px) {
+      .top-bar { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<div id="game">
+  <header>
+    <h1>Small Biz Financial Game</h1>
+    <p>Run your business for 6 months — make smart financial calls</p>
+  </header>
+
+  <div class="progress-track"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+
+  <div class="top-bar">
+    <div class="metric"><div class="metric-label">Cash</div><div class="metric-value" id="cash">$5,000</div></div>
+    <div class="metric"><div class="metric-label">Revenue/mo</div><div class="metric-value" id="revenue">$3,200</div></div>
+    <div class="metric"><div class="metric-label">Debt</div><div class="metric-value" id="debt">$0</div></div>
+    <div class="metric"><div class="metric-label">Month</div><div class="metric-value" id="month">1 / 6</div></div>
+  </div>
+
+  <div id="main-card" class="card">
+    <div class="month-label" id="month-label">Month 1 — January</div>
+    <h3 id="scenario-title"></h3>
+    <p class="scenario-text" id="scenario-text"></p>
+    <div id="result-area" style="display:none;"></div>
+    <div class="choices" id="choices"></div>
+    <button class="next-btn" id="next-btn" style="display:none;" onclick="nextMonth()">Continue to next month →</button>
+  </div>
+
+  <div class="log-card">
+    <div class="log-title">Decision log</div>
+    <div class="log" id="log"><span class="log-empty">No decisions yet...</span></div>
+  </div>
+</div>
+
+<script>
+  const months = ["January","February","March","April","May","June"];
+  const state = { cash: 5000, revenue: 3200, debt: 0, month: 0, log: [], score: 0 };
+
+  const scenarios = [
+    {
+      title: "Pricing decision",
+      text: "Your product costs you $40 to make. You've been selling it at $60 (50% markup). A competitor just dropped their price to $55. What do you do?",
+      tip: "Profit margin = (price − cost) / price",
+      choices: [
+        { label: "Match them at $55", hint: "Smaller margin but competitive", cashDelta: -300, revDelta: -200, debtDelta: 0, result: "You matched the price. Revenue dipped slightly but you kept most customers. Margin dropped from 33% to 27%.", type: "neutral" },
+        { label: "Hold at $60 and emphasize quality", hint: "Protect your margin", cashDelta: 400, revDelta: 100, debtDelta: 0, result: "Smart! You reinforced your value proposition. Some customers stayed loyal and you protected your 33% margin.", type: "good" },
+        { label: "Drop to $50 to undercut everyone", hint: "Race to the bottom?", cashDelta: -800, revDelta: -400, debtDelta: 0, result: "Ouch. At $50 you're barely covering costs. You gained volume but your margin is now just 20% — hard to sustain.", type: "bad" }
+      ]
+    },
+    {
+      title: "Cash flow crunch",
+      text: "A big client owes you $2,000 but won't pay for 45 days. Your rent is due in 10 days ($1,200). You have $1,400 in cash right now.",
+      tip: "Cash flow ≠ profit. You can be profitable but still run out of cash.",
+      choices: [
+        { label: "Take a short-term loan at 8% interest", hint: "Costs ~$13 but solves the gap", cashDelta: 800, revDelta: 0, debtDelta: 500, result: "Good move. You covered rent and the loan cost was small. Now focus on collecting that invoice faster next time.", type: "good" },
+        { label: "Offer client 2% discount to pay now", hint: "Cost $40 but get cash today", cashDelta: 600, revDelta: -40, debtDelta: 0, result: "Clever! You gave up $40 but avoided debt and kept your credit clean. Early payment discounts are a real tool.", type: "good" },
+        { label: "Pay rent late and hope for the best", hint: "Risk a late fee or worse", cashDelta: -400, revDelta: 0, debtDelta: 0, result: "The landlord charged a $200 late fee and flagged your account. Late payments hurt your reputation and cost more long-term.", type: "bad" }
+      ]
+    },
+    {
+      title: "Growth investment",
+      text: "You can buy equipment for $3,000 that would boost your monthly revenue by $800. You have $4,000 in cash. How do you pay for it?",
+      tip: "ROI = (gain from investment / cost) × 100",
+      choices: [
+        { label: "Pay cash upfront", hint: "ROI in ~4 months, but cash drops", cashDelta: -3000, revDelta: 800, debtDelta: 0, result: "Solid decision. Your cash drops but you own the asset outright. Break-even in 3.75 months, then pure profit.", type: "good" },
+        { label: "Finance it at 12% annual interest", hint: "Preserve cash, pay over time", cashDelta: 200, revDelta: 800, debtDelta: 3000, result: "Not bad — you kept cash on hand and the $800 monthly boost covers the payment. Just watch that debt balance.", type: "neutral" },
+        { label: "Skip it — too risky right now", hint: "Safe but miss the opportunity", cashDelta: 0, revDelta: 0, debtDelta: 0, result: "Caution has its place, but $800/month for $3,000 is a 27% annual return — better than most investments!", type: "neutral" }
+      ]
+    },
+    {
+      title: "Debt management",
+      text: "You have $3,000 in business debt at 18% APR. You have $2,000 in extra cash this month. What do you do?",
+      tip: "18% APR = $45/month in interest on $3,000.",
+      choices: [
+        { label: "Pay off $2,000 toward the debt", hint: "Saves ~$30/month in interest", cashDelta: -2000, revDelta: 0, debtDelta: -2000, result: "Great call. Paying down high-interest debt is a guaranteed 18% return. Your remaining debt is $1,000.", type: "good" },
+        { label: "Keep cash as emergency fund", hint: "Safety net has value too", cashDelta: 0, revDelta: 0, debtDelta: 0, result: "Reasonable — cash reserves matter. But at 18% interest, that debt is costing you $45/month. Try to pay it off soon.", type: "neutral" },
+        { label: "Invest the $2,000 in marketing instead", hint: "Growth vs. cost reduction", cashDelta: -2000, revDelta: 500, debtDelta: 0, result: "$500/month from $2,000 is 25% return — better than the 18% debt cost! Bold but it paid off this time.", type: "good" }
+      ]
+    },
+    {
+      title: "Slow season",
+      text: "It's a slow month — revenue dropped 40%. You need to cut $1,000 in costs fast. What do you cut?",
+      tip: "Fixed costs exist even at $0 revenue. Variable costs scale with sales.",
+      choices: [
+        { label: "Cut marketing budget", hint: "Easy but may hurt future sales", cashDelta: 200, revDelta: -300, debtDelta: 0, result: "Short-term savings but you'll feel it next month. Marketing during slow periods often has higher ROI.", type: "neutral" },
+        { label: "Renegotiate supplier terms", hint: "Win-win if they agree", cashDelta: 600, revDelta: 0, debtDelta: 0, result: "You got a 30-day payment extension and a small discount. Supplier relationships are an underrated financial tool.", type: "good" },
+        { label: "Delay paying yourself this month", hint: "Sacrifice but protects the business", cashDelta: 1000, revDelta: 0, debtDelta: 0, result: "Tough but you protected the business. Founders often do this — just make sure it's temporary, not a habit.", type: "good" }
+      ]
+    },
+    {
+      title: "Investing for the future",
+      text: "Business has been great! You have $8,000 in profit after all expenses. What's the smartest move?",
+      tip: "Diversification reduces risk — don't put all eggs in one basket.",
+      choices: [
+        { label: "Reinvest everything into the business", hint: "Max growth but concentrated risk", cashDelta: 2000, revDelta: 1200, debtDelta: 0, result: "Big bet on yourself! Revenue jumps but if business slows, you have no outside cushion. High risk, high reward.", type: "neutral" },
+        { label: "Split: 50% reinvest, 50% in index fund", hint: "Balanced approach", cashDelta: 4000, revDelta: 600, debtDelta: 0, result: "Smart diversification. You grow the business AND build personal wealth. Index funds average ~7-10% annually.", type: "good" },
+        { label: "Build a 3-month emergency fund first", hint: "Safety before growth", cashDelta: 8000, revDelta: 0, debtDelta: 0, result: "Wise foundation. A 3-month reserve means one bad season won't sink you. Now you can invest from a stable base.", type: "good" }
+      ]
+    }
+  ];
+
+  function fmt(n) { return (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString(); }
+
+  function render() {
+    const s = state;
+    const sc = scenarios[s.month];
+
+    document.getElementById("cash").textContent = fmt(s.cash);
+    document.getElementById("cash").className = "metric-value" + (s.cash < 500 ? " danger" : s.cash > 6000 ? " success" : "");
+    document.getElementById("revenue").textContent = fmt(s.revenue);
+    document.getElementById("debt").textContent = fmt(s.debt);
+    document.getElementById("debt").className = "metric-value" + (s.debt > 2000 ? " danger" : "");
+    document.getElementById("month").textContent = (s.month + 1) + " / 6";
+    document.getElementById("month-label").textContent = "Month " + (s.month + 1) + " — " + months[s.month];
+    document.getElementById("scenario-title").textContent = sc.title;
+    document.getElementById("scenario-text").innerHTML = sc.text + '<div style="margin-top:8px;"><span class="tip-badge">Concept: ' + sc.tip + '</span></div>';
+    document.getElementById("result-area").style.display = "none";
+    document.getElementById("next-btn").style.display = "none";
+    document.getElementById("progress").style.width = (s.month / 6 * 100) + "%";
+
+    const choicesEl = document.getElementById("choices");
+    choicesEl.innerHTML = "";
+    sc.choices.forEach((c, i) => {
+      const btn = document.createElement("button");
+      btn.className = "choice-btn";
+      btn.innerHTML = '<span class="choice-label">' + c.label + '</span><span class="choice-hint">' + c.hint + '</span>';
+      btn.onclick = () => choose(i);
+      choicesEl.appendChild(btn);
+    });
+  }
+
+  function choose(idx) {
+    const sc = scenarios[state.month];
+    const c = sc.choices[idx];
+    state.cash += c.cashDelta;
+    state.revenue += c.revDelta;
+    state.debt += c.debtDelta;
+    if (c.type === "good") state.score += 2;
+    else if (c.type === "neutral") state.score += 1;
+
+    const logEntry = "M" + (state.month + 1) + " [" + sc.title + "] → " + c.label;
+    state.log.push(logEntry);
+
+    const logEl = document.getElementById("log");
+    logEl.innerHTML = state.log.map(e => '<div>' + e + '</div>').join("");
+    logEl.scrollTop = logEl.scrollHeight;
+
+    const resultArea = document.getElementById("result-area");
+    resultArea.style.display = "block";
+    resultArea.innerHTML = '<div class="result-box ' + c.type + '">' + c.result + '</div>';
+
+    document.getElementById("choices").innerHTML = "";
+    const nextBtn = document.getElementById("next-btn");
+    nextBtn.style.display = "block";
+    nextBtn.textContent = state.month === 5 ? "See final results →" : "Continue to next month →";
+  }
+
+  function nextMonth() {
+    state.month++;
+    if (state.month >= 6) {
+      showGameOver();
+    } else {
+      render();
+    }
+  }
+
+  function showGameOver() {
+    const pct = Math.round((state.score / 12) * 100);
+    let grade, msg;
+    if (pct >= 80) { grade = "A"; msg = "Outstanding! You have strong financial instincts. Your business survived and grew."; }
+    else if (pct >= 60) { grade = "B"; msg = "Good work! You made mostly smart calls. A few costly decisions, but you kept the business healthy."; }
+    else if (pct >= 40) { grade = "C"; msg = "Decent effort. Some tough decisions hurt your bottom line. Review the concepts and try again!"; }
+    else { grade = "D"; msg = "Rough ride! But that's what simulations are for — learn from these mistakes before making them in real life."; }
+
+    document.getElementById("progress").style.width = "100%";
+    document.getElementById("main-card").innerHTML = `
+      <div class="game-over">
+        <div class="month-label">6 months complete</div>
+        <h2>Business report card</h2>
+        <div class="grade-label">final grade</div>
+        <div class="score-big">${grade}</div>
+        <p>${msg}</p>
+        <div class="top-bar" style="margin-bottom:1.25rem;">
+          <div class="metric"><div class="metric-label">Final cash</div><div class="metric-value ${state.cash < 1000 ? 'danger' : 'success'}">${fmt(state.cash)}</div></div>
+          <div class="metric"><div class="metric-label">Revenue/mo</div><div class="metric-value">${fmt(state.revenue)}</div></div>
+          <div class="metric"><div class="metric-label">Final debt</div><div class="metric-value ${state.debt > 1000 ? 'danger' : ''}">${fmt(state.debt)}</div></div>
+          <div class="metric"><div class="metric-label">Score</div><div class="metric-value">${state.score}/12</div></div>
+        </div>
+        <button class="next-btn" onclick="restartGame()">Play again →</button>
+      </div>`;
+  }
+
+  function restartGame() {
+    state.cash = 5000; state.revenue = 3200; state.debt = 0;
+    state.month = 0; state.log = []; state.score = 0;
+    document.getElementById("main-card").innerHTML = `
+      <div class="month-label" id="month-label"></div>
+      <h3 id="scenario-title"></h3>
+      <p class="scenario-text" id="scenario-text"></p>
+      <div id="result-area" style="display:none;"></div>
+      <div class="choices" id="choices"></div>
+      <button class="next-btn" id="next-btn" style="display:none;" onclick="nextMonth()">Continue to next month →</button>`;
+    document.getElementById("log").innerHTML = '<span class="log-empty">No decisions yet...</span>';
+    render();
+  }
+
+  render();
+</script>
+</body>
+</html>
